@@ -1,58 +1,113 @@
-function App() {
-  // logic, structure,& style
-  const categories = [
-    { _id: 'dct123', name: 'food'},
-    { _id: 'dct124', name: 'rent'},
-    { _id: 'dct112', name: 'travel'}
+import axios from "axios";
+import {} from "module";
+import "./styles.css";
+import { useEffect, useState } from "react";
 
-  ]
+export default function Flag() {
+  const [countries, setCountries] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [countryData, setCountryData] = useState(null);
 
-  const expenses = [
-    {_id:'dct222', expenseDate:'2024-02-25', title:'Grocery Shopping', amount:1000, category:'food'},
-    {_id:'dct223', expenseDate:'2024-02-26', title:'Metro pass', amount:750, category:'travel'},
-  ]
+  useEffect(() => {
+    axios
+      .get("https://restcountries.com/v3.1/all")
+      .then((response) => {
+        const result = response.data;
+        setCountries(result);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
 
+  useEffect(() => {
+    if (selectedCountry) {
+      axios
+        .get(`https://restcountries.com/v3.1/name/${selectedCountry}`)
+        .then((response) => {
+          const [country] = response.data;
+          setCountryData(country);
+        })
+        .catch((err) => {
+          console.log(err);
+          setCountryData(null);
+        });
+    }
+  }, [selectedCountry]);
 
   return (
     <div>
-      <h1>Expense App</h1>
-      <h2>Listing Categories - {categories.length} </h2>
-      <ul>
-        { categories.map(function(ele){
-            return <li key={ele._id}> { ele.name } </li>
-        })}
-      </ul>
+      <h1>Country Information</h1>
+      <select
+        value={selectedCountry}
+        onChange={(e) => {
+          setSelectedCountry(e.target.value);
+        }}
+      >
+        <option value="">Select a country</option>
+        {countries.map((country) => (
+          <option key={country.name.common} value={country.name.common}>
+            {country.name.common}
+          </option>
+        ))}
+      </select>
 
-      <h2>Listing Expense-{expenses.length} </h2>
-      <table border="1">
-        <thead>
-          <tr>
-            <th>Expense Date</th>
-            <th>Amount</th>
-            <th>Category</th>
-            <th>Title</th>
-          </tr>
-        </thead>
-        <tbody>
-          { expenses.map((ele) =>{
-            return <tr key={ele._id}>
-              <td> { ele.expenseDate} </td>
-              <td> { ele.amount} </td>
-              <td> { ele.category} </td>
-              <td> { ele.title} </td>
-            </tr>
-          })}
-        </tbody>
-      </table>
+      {countryData && (
+        <div>
+          <h2>{countryData.name.common}</h2>
+          <img
+            width="157"
+            src={countryData.flags.png}
+            alt={`${countryData.name.common} flag`}
+          />
+          <p>
+            <b>Capital:</b> {countryData.capital}
+          </p>
+          <p>
+            <b>Currency:</b>
+            {
+              countryData.currencies[Object.keys(countryData.currencies)[0]]
+                .name
+            }
+            {"   "}"
+            {
+              countryData.currencies[Object.keys(countryData.currencies)[0]]
+                .symbol
+            }
+            "
+          </p>
 
-      <h2>Total Expense-{ expenses.reduce((acc, cv) => {
-          acc = acc+cv.amount
-          return acc
-      }, 0)}   </h2> 
-          
+          <p>
+            <b>Population:</b> {countryData.population}
+          </p>
+          <p>
+            <b>Region:</b> {countryData.region}
+          </p>
+          <p>
+            <b>Subregion:</b> {countryData.subregion}
+          </p>
+          <p>
+            <b>Time Zone:</b> {countryData.timezones}
+          </p>
+          <p>
+            <b>Continent:</b> {countryData.continents}
+          </p>
 
-     </div>
-  )
-}            
-          
-export default App
+          <p>
+            <b>Land Area:</b> {countryData.area} km²
+          </p>
+          <p>
+            <b>Google Map:</b>{" "}
+            <a
+              href={countryData.maps.googleMaps}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View on Google Maps
+            </a>
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
