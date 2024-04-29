@@ -1,6 +1,6 @@
 import axios from "axios";
 import {} from "module";
-import "./styles.css";
+import "./index.css";
 import { useEffect, useState } from "react";
 
 export default function Flag() {
